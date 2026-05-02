@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #f5f7fa; color: #333; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+        .header h1 { font-size: 26px; font-weight: 700; color: #1a1a2e; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .sync-status { font-size: 12px; color: #888; padding: 7px 14px; background: #fff; border-radius: 6px; border: 1px solid #ddd; }
+        .sync-status.syncing { color: #1a7a4a; background: #f0fff6; border-color: #1a7a4a; }
+        .sync-status.error { color: #D85A30; background: #fff3f0; border-color: #D85A30; }
+        .refresh-btn { padding: 7px 16px; background: #1a1a2e; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .refresh-btn:hover { background: #2c2c54; }
+
+        /* Metrics */
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .metric-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid #378ADD; }
+        .metric-card.negative { border-left-color: #D85A30; }
+        .metric-card.positive { border-left-color: #1D9E75; }
+        .metric-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; font-weight: 600; }
+        .metric-value { font-size: 26px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .metric-card.negative .metric-value { color: #D85A30; }
+        .metric-card.positive .metric-value { color: #1D9E75; }
+        .metric-sub { font-size: 12px; color: #888; }
+
+        /* Charts */
+        .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .chart-card { background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .chart-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
+        .chart-container { position: relative; height: 220px; }
+        .pie-legend { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 8px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #f0f0f0; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #666; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+        /* Table */
+        .table-card { background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        .table-header { padding: 16px 20px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; }
+        .table-title { font-size: 11px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.07em; }
+        .table-sub { font-size: 11px; color: #bbb; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background: #f9fafc; }
+        th { padding: 11px 16px; text-align: left; font-weight: 600; color: #999; text-transform: uppercase; font-size: 10px; letter-spacing: 0.07em; border-bottom: 1px solid #eee; white-space: nowrap; }
+        th.r { text-align: right; }
+        td { padding: 13px 16px; border-bottom: 1px solid #f5f5f5; vertical-align: middle; white-space: nowrap; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafbfd; }
+        .ticker { font-weight: 700; color: #1a1a2e; font-size: 13px; }
+        .co-name { color: #888; font-size: 12px; }
+        .pos { color: #1D9E75; font-weight: 600; }
+        .neg { color: #D85A30; font-weight: 600; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
+        .badge-pos { background: #edfaf4; color: #1D9E75; }
+        .badge-neg { background: #fff3f0; color: #D85A30; }
+        .val-bold { font-weight: 600; color: #1a1a2e; }
+
+        /* Error / Loading */
+        .loading { text-align: center; padding: 60px; color: #aaa; font-size: 15px; }
+        .error-box { background: #fff3f0; border: 1px solid #ffd0c7; color: #D85A30; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; }
+
+        @media (max-width: 700px) {
+            .metrics { grid-template-columns: 1fr 1fr; }
+            .charts { grid-template-columns: 1fr; }
+            td, th { padding: 10px 10px; }
+            .metric-value { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📊 Portfolio Dashboard</h1>
+        <div class="header-right">
+            <span class="sync-status" id="syncStatus">Loading...</span>
+            <button class="refresh-btn" onclick="fetchData()">⟳ Refresh</button>
+        </div>
+    </div>
+
+    <div id="errorBox"></div>
+
+    <div id="loadingDiv" class="loading">Loading your portfolio from Google Sheets...</div>
+
+    <div id="dashboard" style="display:none">
+        <div class="metrics" id="metricsDiv"></div>
+        <div class="charts">
+            <div class="chart-card">
+                <div class="chart-title">Allocation by Position Value</div>
+                <div class="chart-container"><canvas id="pieChart"></canvas></div>
+                <div class="pie-legend" id="pieLegend"></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">Unrealized P/L % by Position</div>
+                <div class="chart-container"><canvas id="barChart"></canvas></div>
+            </div>
+        </div>
+        <div class="table-card">
+            <div class="table-header">
+                <span class="table-title">Holdings</span>
+                <span class="table-sub">Prices in USD · Values in GBP</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Name</th>
+                        <th class="r">Qty</th>
+                        <th class="r">Avg Buy</th>
+                        <th class="r">Price</th>
+                        <th class="r">Value</th>
+                        <th class="r">Cost Basis</th>
+                        <th class="r">P/L £</th>
+                        <th class="r">P/L %</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Config ─────────────────────────────────────────────────────────────────
+const SHEET_ID  = '1QnKxRsryjfgfh9S-x2IAnm_8TG05bqnKrjL1duOwMKs';
+const GID       = '1191326498'; // Master tab gid
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_nd-zgIbOJIyNbDFhtmo07YJnEjRYL0K7gRYmfcD1aS7zhztBZkVzfQ_4acN5uPTcDrSP2Dn1DyC7/pub?output=csv&gid=1191326498';
+
+const PALETTE = ['#378ADD','#1D9E75','#BA7517','#D85A30','#7F77DD','#888780','#D4537E','#639922','#E24B4A','#0F6E56'];
+let charts = { pie: null, bar: null };
+
+// ── CSV Parser ──────────────────────────────────────────────────────────────
+function parseCSV(text) {
+    const rows = [];
+    for (const line of text.split('\n')) {
+        if (!line.trim()) continue;
+        const row = [];
+        let inQ = false, cell = '';
+        for (const ch of line) {
+            if (ch === '"') { inQ = !inQ; }
+            else if (ch === ',' && !inQ) { row.push(cell.trim()); cell = ''; }
+            else { cell += ch; }
+        }
+        row.push(cell.trim());
+        rows.push(row);
+    }
+    return rows;
+}
+
+// ── Clean number from £/$, commas, etc. ────────────────────────────────────
+function num(str) {
+    if (!str) return 0;
+    return parseFloat(str.toString().replace(/[£$,\s%]/g,'').replace('−','-').replace('–','-')) || 0;
+}
+
+function fmt(n, prefix='£') {
+    return prefix + Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+// ── Fetch ───────────────────────────────────────────────────────────────────
+async function fetchData() {
+    setStatus('Syncing...', 'syncing');
+    try {
+        const PROXY = 'https://api.allorigins.win/raw?url=';
+        const res = await fetch(PROXY + encodeURIComponent(CSV_URL + '&t=' + Date.now()));
+        if (!res.ok) throw new Error(`HTTP ${res.status} — Make sure the sheet is shared as "Anyone with the link → Viewer"`);
+        const text = await res.text();
+        const rows = parseCSV(text);
+        if (rows.length < 2) throw new Error('Sheet appears empty.');
+        document.getElementById('errorBox').innerHTML = '';
+        render(rows);
+        setStatus('Synced ' + new Date().toLocaleTimeString(), '');
+        setTimeout(fetchData, 60000);
+    } catch(e) {
+        setStatus('Error', 'error');
+        document.getElementById('errorBox').innerHTML =
+            `<div class="error-box">⚠️ ${e.message}</div>`;
+        setTimeout(fetchData, 15000);
+    }
+}
+
+function setStatus(txt, cls) {
+    const el = document.getElementById('syncStatus');
+    el.textContent = txt;
+    el.className = 'sync-status ' + cls;
+}
+
+// ── Parse rows → holdings ───────────────────────────────────────────────────
+function render(rows) {
+    const SKIP = ['ticker','instrument','name','applied','xbt','xib'];
+    const holdings = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const ticker = (r[0]||'').trim();
+        if (!ticker) continue;
+        if (SKIP.some(s => ticker.toLowerCase().startsWith(s))) continue;
+
+        const value    = num(r[9]);   // J - Value GBP
+        const cost     = num(r[10]);  // K - Cost GBP
+        const plGBP    = num(r[11]);  // L - P/L GBP
+        const plPct    = num(r[12]);  // M - P/L %
+
+        if (value <= 0) continue;
+
+        holdings.push({
+            ticker,
+            name:      (r[1]||'').trim(),
+            qty:       r[2]||'',
+            avgBuy:    (r[4]||'').trim(),
+            price:     (r[8]||'').trim(),
+            value,
+            cost,
+            plGBP,
+            plPct
+        });
+    }
+
+    if (!holdings.length) {
+        document.getElementById('errorBox').innerHTML =
+            '<div class="error-box">⚠️ No holdings found. Check that the Master tab gid is correct.</div>';
+        return;
+    }
+
+    renderMetrics(holdings);
+    renderCharts(holdings);
+    renderTable(holdings);
+    document.getElementById('loadingDiv').style.display = 'none';
+    document.getElementById('dashboard').style.display  = 'block';
+}
+
+// ── Metrics ──────────────────────────────────────────────────────────────────
+function renderMetrics(h) {
+    const totalVal  = h.reduce((s,x)=>s+x.value,0);
+    const totalPL   = h.reduce((s,x)=>s+x.plGBP,0);
+    const totalCost = h.reduce((s,x)=>s+x.cost,0);
+    const totalPct  = totalCost ? (totalPL/totalCost)*100 : 0;
+    const best  = h.reduce((a,b)=>b.plPct>a.plPct?b:a);
+    const worst = h.reduce((a,b)=>b.plPct<a.plPct?b:a);
+
+    document.getElementById('metricsDiv').innerHTML = `
+        <div class="metric-card">
+            <div class="metric-label">Portfolio Value</div>
+            <div class="metric-value">£${totalVal.toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:0})}</div>
+            <div class="metric-sub">${h.length} positions</div>
+        </div>
+        <div class="metric-card ${totalPL>=0?'positive':'negative'}">
+            <div class="metric-label">Unrealized P/L</div>
+            <div class="metric-value">${totalPL>=0?'+':'−'}${fmt(totalPL)}</div>
+            <div class="metric-sub">${totalPct>=0?'+':''}${totalPct.toFixed(2)}% total</div>
+        </div>
+        <div class="metric-card positive">
+            <div class="metric-label">Best Performer</div>
+            <div class="metric-value">+${best.plPct.toFixed(2)}%</div>
+            <div class="metric-sub">${best.ticker} · ${best.name}</div>
+        </div>
+        <div class="metric-card negative">
+            <div class="metric-label">Worst Performer</div>
+            <div class="metric-value">${worst.plPct.toFixed(2)}%</div>
+            <div class="metric-sub">${worst.ticker} · ${worst.name}</div>
+        </div>`;
+}
+
+// ── Charts ───────────────────────────────────────────────────────────────────
+function renderCharts(h) {
+    const byVal  = [...h].sort((a,b)=>b.value-a.value);
+    const byPct  = [...h].sort((a,b)=>b.plPct-a.plPct);
+    const total  = h.reduce((s,x)=>s+x.value,0);
+
+    if (charts.pie) charts.pie.destroy();
+    if (charts.bar) charts.bar.destroy();
+
+    charts.pie = new Chart(document.getElementById('pieChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: byVal.map(x=>x.ticker),
+            datasets: [{ data: byVal.map(x=>x.value), backgroundColor: PALETTE, borderWidth: 0 }]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false, cutout:'65%',
+            plugins: {
+                legend:{display:false},
+                tooltip:{callbacks:{label:c=>`£${c.parsed.toLocaleString('en-GB',{maximumFractionDigits:0})}`}}
+            }
+        }
+    });
+
+    document.getElementById('pieLegend').innerHTML = byVal.map((x,i)=>
+        `<div class="legend-item"><div class="legend-dot" style="background:${PALETTE[i]}"></div>${x.ticker} ${((x.value/total)*100).toFixed(1)}%</div>`
+    ).join('');
+
+    charts.bar = new Chart(document.getElementById('barChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: byPct.map(x=>x.ticker),
+            datasets: [{
+                data: byPct.map(x=>x.plPct),
+                backgroundColor: byPct.map(x=>x.plPct>=0?'#1D9E75':'#D85A30'),
+                borderWidth:0, borderRadius:3
+            }]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>`${c.parsed.y.toFixed(2)}%`}}},
+            scales:{
+                x:{grid:{display:false}, ticks:{font:{size:11},color:'#aaa'}},
+                y:{grid:{color:'rgba(0,0,0,0.05)'}, ticks:{font:{size:11},color:'#aaa',callback:v=>v+'%'}}
+            }
+        }
+    });
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+function renderTable(h) {
+    const sorted = [...h].sort((a,b)=>b.value-a.value);
+    document.getElementById('tableBody').innerHTML = sorted.map(x => `
+        <tr>
+            <td><span class="ticker">${x.ticker}</span></td>
+            <td><span class="co-name">${x.name}</span></td>
+            <td class="r">${x.qty}</td>
+            <td class="r" style="color:#888">${x.avgBuy}</td>
+            <td class="r" style="color:#888">${x.price}</td>
+            <td class="r"><span class="val-bold">£${x.value.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></td>
+            <td class="r" style="color:#aaa">£${x.cost.toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+            <td class="r"><span class="${x.plGBP>=0?'pos':'neg'}">${x.plGBP>=0?'+':'−'}${fmt(x.plGBP)}</span></td>
+            <td class="r"><span class="badge ${x.plPct>=0?'badge-pos':'badge-neg'}">${x.plPct>=0?'+':''}${x.plPct.toFixed(2)}%</span></td>
+        </tr>`).join('');
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+fetchData();
+</script>
+</body>
+</html>
