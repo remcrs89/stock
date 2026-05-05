@@ -220,7 +220,7 @@ function render(rows) {
     if (!ticker||SKIP.some(s=>ticker.toLowerCase().startsWith(s))) continue;
     const value=num(r[9]);
     if (value<=0) continue;
-    holdings.push({ticker,name:(r[1]||'').trim(),qty:num(r[2]),avgBuy:num(r[4]),price:num(r[8]),value,cost:num(r[10]),plGBP:num(r[11]),plPct:num(r[12])});
+    holdings.push({ticker,name:(r[1]||'').trim(),qty:num(r[2]),avgBuy:num(r[4]),price:num(r[7]),value,cost:num(r[10]),plGBP:num(r[11]),plPct:num(r[12])});
   }
   if (!holdings.length){showError('No holdings found.');return;}
   allHoldings=holdings;
