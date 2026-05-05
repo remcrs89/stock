@@ -286,10 +286,10 @@ function renderTable() {
       <td><span class="co-name">${x.name}</span></td>
       <td class="r">${x.qty%1===0?x.qty:x.qty.toFixed(2)}</td>
       <td class="r" style="color:var(--muted)">£${x.avgBuy.toFixed(2)}</td>
-      <td class="r" style="color:var(--muted)">$${x.price.toFixed(2)}</td>
-      <td class="r"><span class="val-bold">${fmtGBP(x.value)}</span></td>
+      <td class="r" style="color:var(--muted)">£${x.price.toFixed(2)}</td>
+      <td class="r"><span class="val-bold">£{fmtGBP(x.value)}</span></td>
       <td class="r" style="color:#aaa">${fmtGBP(x.cost)}</td>
-      <td class="r"><span class="${x.plGBP>=0?'pos':'neg'}">${x.plGBP>=0?'+':'−'}${fmtGBP(x.plGBP)}</span></td>
+      <td class="r"><span class="£{x.plGBP>=0?'pos':'neg'}">${x.plGBP>=0?'+':'−'}${fmtGBP(x.plGBP)}</span></td>
       <td class="r"><span class="badge ${x.plPct>=0?'badge-pos':'badge-neg'}">${x.plPct>=0?'+':''}${x.plPct.toFixed(2)}%</span></td>
     </tr>`).join('');
   const tv=allHoldings.reduce((s,x)=>s+x.value,0);
