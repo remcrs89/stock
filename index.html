@@ -225,7 +225,6 @@ td.spark-td { padding-top:10px; padding-bottom:10px; }
               <th id="th-plPct" class="r" onclick="sortTable('plPct')">P/L %</th>
               <th id="th-weekPct" class="r" onclick="sortTable('weekPct')">7d %</th>
               <th id="th-monthPct" class="r" onclick="sortTable('monthPct')">30d %</th>
-              <th class="r">Trend</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -337,8 +336,8 @@ function render(rows) {
       cost:num(r[10]),
       plGBP:num(r[11]),
       plPct:num(r[12]),
-      weekPct: num(r[13]) * 100,   // col N — GOOGLEFINANCE returns decimal e.g. 0.1766
-      monthPct: num(r[15]) * 100   // col P — same
+      weekPct: num(r[13]),   // col N — sheet stores as % e.g. "17.66%" → num() strips % sign
+      monthPct: num(r[15])   // col P — same
     });
   }
   if (!holdings.length){showError('No holdings found.');return;}
@@ -546,7 +545,6 @@ function renderTable() {
       <td class="r"><span class="badge ${x.plPct>=0?'badge-pos':'badge-neg'}">${x.plPct>=0?'+':''}${x.plPct.toFixed(2)}%</span></td>
       <td class="r"><span class="${x.weekPct>=0?'pos':'neg'}">${x.weekPct>=0?'+':''}${x.weekPct.toFixed(2)}%</span></td>
       <td class="r"><span class="${x.monthPct>=0?'pos':'neg'}">${x.monthPct>=0?'+':''}${x.monthPct.toFixed(2)}%</span></td>
-      <td class="spark-td">${makeSpark(x.weekPct, x.monthPct)}</td>
     </tr>`).join('');
   const tv=allHoldings.reduce((s,x)=>s+x.value,0);
   const tc=allHoldings.reduce((s,x)=>s+x.cost,0);
@@ -567,7 +565,6 @@ function renderTable() {
       <td class="r"><span class="badge ${tpct>=0?'badge-pos':'badge-neg'}">${tpct>=0?'+':''}${tpct.toFixed(2)}%</span></td>
       <td class="r">${avgW!==null?`<span class="${avgW>=0?'pos':'neg'}">${avgW>=0?'+':''}${avgW.toFixed(2)}%</span>`:'—'}</td>
       <td class="r">${avgM!==null?`<span class="${avgM>=0?'pos':'neg'}">${avgM>=0?'+':''}${avgM.toFixed(2)}%</span>`:'—'}</td>
-      <td></td>
     </tr>`;
 }
 
