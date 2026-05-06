@@ -12,15 +12,20 @@
   --navy: #1a1a2e;
   --navy2: #2c2c54;
   --green: #1D9E75;
+  --green-soft: #edfaf4;
   --red: #D85A30;
+  --red-soft: #fff3f0;
   --blue: #378ADD;
+  --blue-soft: #e8f1fb;
   --text: #1a1a2e;
   --muted: #888;
   --border: #eef0f4;
   --shadow: 0 2px 8px rgba(0,0,0,0.07);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.08);
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
 .topbar { background:var(--navy); padding:14px 28px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
 .topbar h1 { color:#fff; font-size:20px; font-weight:700; display:flex; align-items:center; gap:10px; }
 .topbar-right { display:flex; align-items:center; gap:10px; }
@@ -30,7 +35,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .sync-pill.ok { color:#7eedc4; border-color:#7eedc4; }
 .btn { padding:6px 16px; border-radius:6px; border:none; cursor:pointer; font-size:12px; font-weight:600; transition:all 0.2s; background:rgba(255,255,255,0.15); color:#fff; }
 .btn:hover { background:rgba(255,255,255,0.25); }
+.btn-light { padding:6px 14px; border-radius:6px; border:1px solid var(--border); background:#fff; color:var(--text); font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+.btn-light:hover { background:#f8f9fc; border-color:var(--blue); color:var(--blue); }
+
 .page { max-width:1440px; margin:0 auto; padding:24px 20px; }
+
+/* Metrics */
 .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:20px; }
 .metric { background:var(--card); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); position:relative; overflow:hidden; }
 .metric::before { content:''; position:absolute; top:0; left:0; width:4px; height:100%; background:var(--blue); border-radius:4px 0 0 4px; }
@@ -41,26 +51,49 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial
 .metric.pos .metric-val { color:var(--green); }
 .metric.neg .metric-val { color:var(--red); }
 .metric-sub { font-size:12px; color:var(--muted); }
-.charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+
+/* Progress bar (cost vs value) */
+.progress-card { background:var(--card); border-radius:12px; padding:20px 22px; box-shadow:var(--shadow); margin-bottom:20px; }
+.progress-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; gap:14px; flex-wrap:wrap; }
+.progress-title { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+.progress-stats { display:flex; gap:24px; font-size:12px; color:#666; }
+.progress-stats strong { color:var(--text); font-size:13px; font-weight:700; margin-left:4px; }
+.progress-bar-bg { position:relative; background:#f0f2f7; border-radius:8px; height:36px; overflow:hidden; box-shadow:inset 0 1px 2px rgba(0,0,0,0.04); }
+.progress-bar-cost { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#cdd5e0,#b8c2d0); border-radius:8px; }
+.progress-bar-value { position:absolute; left:0; top:0; bottom:0; border-radius:8px; transition:width 0.6s ease; }
+.progress-bar-value.gain { background:linear-gradient(90deg,var(--green) 0%,#1FB585 100%); }
+.progress-bar-value.loss { background:linear-gradient(90deg,var(--red) 0%,#E87047 100%); }
+.progress-marker { position:absolute; top:-6px; bottom:-6px; width:2px; background:var(--navy); }
+.progress-marker::after { content:'COST'; position:absolute; top:-16px; left:50%; transform:translateX(-50%); font-size:9px; font-weight:700; color:var(--navy); letter-spacing:0.05em; white-space:nowrap; }
+.progress-legend { display:flex; gap:16px; margin-top:14px; font-size:11px; color:var(--muted); flex-wrap:wrap; }
+.progress-legend-item { display:flex; align-items:center; gap:6px; }
+.progress-legend-dot { width:10px; height:10px; border-radius:2px; }
+
+/* Charts */
+.charts { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
 .card { background:var(--card); border-radius:12px; padding:20px; box-shadow:var(--shadow); }
 .card-title { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:16px; }
 .chart-wrap { position:relative; height:230px; }
-.legend { display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:6px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
+.legend { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:6px; margin-top:14px; padding-top:12px; border-top:1px solid var(--border); }
 .legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#666; }
 .legend-dot { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+
+/* Table */
 .table-card { background:var(--card); border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
 .table-topbar { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
 .table-topbar-left { font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
-.table-topbar-right { font-size:11px; color:#bbb; }
+.table-topbar-right { font-size:11px; color:#bbb; display:flex; align-items:center; gap:14px; }
 .table-wrap { overflow-x:auto; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 thead { background:#f8f9fc; }
-th { padding:10px 16px; text-align:left; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; border-bottom:2px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none; }
+th { padding:10px 14px; text-align:left; font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.07em; border-bottom:2px solid var(--border); white-space:nowrap; cursor:pointer; user-select:none; }
 th:hover { color:var(--navy); }
 th.r { text-align:right; }
 th.sorted { color:var(--blue); }
-td { padding:13px 16px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
+td { padding:13px 14px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
 tr:last-child td { border-bottom:none; }
+tr.row-pos { background:linear-gradient(90deg,rgba(29,158,117,0.025),transparent 60%); }
+tr.row-neg { background:linear-gradient(90deg,rgba(216,90,48,0.025),transparent 60%); }
 tr:hover td { background:#fafbfd; }
 tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--border); }
 .ticker { font-weight:700; color:var(--navy); }
@@ -68,18 +101,40 @@ tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--borde
 .pos { color:var(--green); font-weight:600; }
 .neg { color:var(--red); font-weight:600; }
 .badge { display:inline-block; padding:3px 8px; border-radius:5px; font-size:11px; font-weight:700; }
-.badge-pos { background:#edfaf4; color:var(--green); }
-.badge-neg { background:#fff3f0; color:var(--red); }
+.badge-pos { background:var(--green-soft); color:var(--green); }
+.badge-neg { background:var(--red-soft); color:var(--red); }
 .val-bold { font-weight:600; }
+
+/* Weight bar inline */
+.weight-cell { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+.weight-bar { width:42px; height:5px; background:#eef0f4; border-radius:3px; overflow:hidden; flex-shrink:0; }
+.weight-bar-fill { height:100%; background:var(--blue); border-radius:3px; }
+.weight-pct { font-size:12px; color:var(--text); font-weight:600; min-width:38px; text-align:right; }
+
+/* Skeleton */
 .skeleton { background:linear-gradient(90deg,#f0f2f7 25%,#e4e7ee 50%,#f0f2f7 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:12px; }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 .skel-metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:20px; }
-.skel-charts { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
-.error-box { background:#fff3f0; border:1px solid #ffd0c7; color:var(--red); padding:14px 18px; border-radius:10px; margin-bottom:16px; font-size:13px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.skel-charts { display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+
+/* Errors */
+.error-box { background:var(--red-soft); border:1px solid #ffd0c7; color:var(--red); padding:14px 18px; border-radius:10px; margin-bottom:16px; font-size:13px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 .btn-retry { padding:5px 14px; border-radius:6px; border:1.5px solid var(--red); background:transparent; color:var(--red); font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; }
 .btn-retry:hover { background:var(--red); color:#fff; }
-@media(max-width:900px) { .charts,.skel-charts { grid-template-columns:1fr; } }
-@media(max-width:600px) { .metrics,.skel-metrics { grid-template-columns:1fr 1fr; } .metric-val { font-size:22px; } .topbar { padding:12px 16px; } .page { padding:16px 12px; } td,th { padding:10px 10px; } }
+
+@media(max-width:1100px) { .charts,.skel-charts { grid-template-columns:1fr 1fr; } }
+@media(max-width:760px) {
+  .charts,.skel-charts { grid-template-columns:1fr; }
+  .progress-stats { gap:14px; font-size:11px; }
+}
+@media(max-width:600px) {
+  .metrics,.skel-metrics { grid-template-columns:1fr 1fr; }
+  .metric-val { font-size:22px; }
+  .topbar { padding:12px 16px; }
+  .page { padding:16px 12px; }
+  td,th { padding:10px 10px; }
+  .weight-bar { display:none; }
+}
 </style>
 </head>
 <body>
@@ -102,7 +157,9 @@ tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--borde
       <div class="skeleton" style="height:90px"></div>
       <div class="skeleton" style="height:90px"></div>
     </div>
+    <div class="skeleton" style="height:100px;margin-bottom:20px"></div>
     <div class="skel-charts">
+      <div class="skeleton" style="height:300px"></div>
       <div class="skeleton" style="height:300px"></div>
       <div class="skeleton" style="height:300px"></div>
     </div>
@@ -111,21 +168,33 @@ tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--borde
 
   <div id="dashboard" style="display:none">
     <div class="metrics" id="metricsDiv"></div>
+
+    <div class="progress-card" id="progressCard"></div>
+
     <div class="charts">
       <div class="card">
-        <div class="card-title">Allocation by Position Value</div>
+        <div class="card-title">Allocation by Position</div>
         <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
         <div class="legend" id="pieLegend"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Allocation by Sector</div>
+        <div class="chart-wrap"><canvas id="sectorChart"></canvas></div>
+        <div class="legend" id="sectorLegend"></div>
       </div>
       <div class="card">
         <div class="card-title">Unrealized P/L % by Position</div>
         <div class="chart-wrap"><canvas id="barChart"></canvas></div>
       </div>
     </div>
+
     <div class="table-card">
       <div class="table-topbar">
         <span class="table-topbar-left">Holdings</span>
-        <span class="table-topbar-right">USD prices · GBP values · Click column header to sort</span>
+        <span class="table-topbar-right">
+          <span>USD prices · GBP values · Click column to sort</span>
+          <button class="btn-light" onclick="exportCSV()">⇩ Export CSV</button>
+        </span>
       </div>
       <div class="table-wrap">
         <table>
@@ -133,10 +202,12 @@ tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--borde
             <tr>
               <th id="th-ticker" onclick="sortTable('ticker')">Ticker</th>
               <th id="th-name" onclick="sortTable('name')">Name</th>
+              <th id="th-sector" onclick="sortTable('sector')">Sector</th>
               <th id="th-qty" class="r" onclick="sortTable('qty')">Qty</th>
               <th id="th-avgBuy" class="r" onclick="sortTable('avgBuy')">Avg Buy</th>
               <th id="th-price" class="r" onclick="sortTable('price')">Live Price</th>
               <th id="th-value" class="r sorted" onclick="sortTable('value')">Value ▼</th>
+              <th id="th-weight" class="r" onclick="sortTable('weight')">Weight</th>
               <th id="th-cost" class="r" onclick="sortTable('cost')">Cost Basis</th>
               <th id="th-plGBP" class="r" onclick="sortTable('plGBP')">P/L £</th>
               <th id="th-plPct" class="r" onclick="sortTable('plPct')">P/L %</th>
@@ -152,8 +223,25 @@ tfoot td { background:#f8f9fc; font-weight:700; border-top:2px solid var(--borde
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_nd-zgIbOJIyNbDFhtmo07YJnEjRYL0K7gRYmfcD1aS7zhztBZkVzfQ_4acN5uPTcDrSP2Dn1DyC7/pub?gid=1191326498&single=true&output=csv';
-const PALETTE = ['#378ADD','#1D9E75','#BA7517','#D85A30','#7F77DD','#888780','#D4537E','#639922','#E24B4A','#0F6E56'];
-let charts = {pie:null,bar:null};
+const PALETTE = ['#378ADD','#1D9E75','#BA7517','#D85A30','#7F77DD','#888780','#D4537E','#639922','#E24B4A','#0F6E56','#3DA5D9'];
+const SECTOR_PALETTE = ['#378ADD','#1D9E75','#BA7517','#D85A30','#7F77DD','#D4537E','#888780'];
+
+// Sector mapping for known tickers — extend as you add positions
+const SECTORS = {
+  'LEU': 'Energy / Nuclear',
+  'INOD': 'Tech / AI',
+  'ALAB': 'Tech / Semis',
+  'SMR': 'Energy / Nuclear',
+  'APLD': 'Tech / AI',
+  'NBIS': 'Tech / AI',
+  'SYM': 'Tech / Robotics',
+  'CRWV': 'Tech / AI',
+  'FCX': 'Materials / Mining',
+  'MARA': 'Crypto / Mining',
+  'RONGBP': 'Cash / FX'
+};
+
+let charts = {pie:null,bar:null,sector:null};
 let allHoldings = [];
 let sortKey = 'value', sortAsc = false;
 let retryTimer = null;
@@ -210,6 +298,9 @@ function num(s) {
 function fmtGBP(n) {
   return '£'+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
+function fmtGBPshort(n) {
+  return '£'+Math.abs(n).toLocaleString('en-GB',{maximumFractionDigits:0});
+}
 
 function render(rows) {
   const SKIP=['ticker','instrument','name','xbt','xib','avg','quanti'];
@@ -220,11 +311,28 @@ function render(rows) {
     if (!ticker||SKIP.some(s=>ticker.toLowerCase().startsWith(s))) continue;
     const value=num(r[9]);
     if (value<=0) continue;
-    holdings.push({ticker,name:(r[1]||'').trim(),qty:num(r[2]),avgBuy:num(r[4])/100,price:num(r[7]),value,cost:num(r[10]),plGBP:num(r[11]),plPct:num(r[12])});
+    holdings.push({
+      ticker,
+      name:(r[1]||'').trim(),
+      sector: SECTORS[ticker.toUpperCase()] || 'Other',
+      qty:num(r[2]),
+      avgBuy:num(r[4])/100,
+      price:num(r[7]),
+      value,
+      cost:num(r[10]),
+      plGBP:num(r[11]),
+      plPct:num(r[12])
+    });
   }
   if (!holdings.length){showError('No holdings found.');return;}
+
+  // Compute weight % once
+  const totalVal = holdings.reduce((s,x)=>s+x.value,0);
+  holdings.forEach(h => h.weight = totalVal ? (h.value / totalVal) * 100 : 0);
+
   allHoldings=holdings;
   renderMetrics(holdings);
+  renderProgress(holdings);
   renderCharts(holdings);
   renderTable();
   document.getElementById('skeleton').style.display='none';
@@ -245,19 +353,71 @@ function renderMetrics(h) {
     <div class="metric neg"><div class="metric-label">Worst Performer</div><div class="metric-val">${worst.plPct.toFixed(2)}%</div><div class="metric-sub">${worst.ticker} · ${worst.name}</div></div>`;
 }
 
+function renderProgress(h) {
+  const tv = h.reduce((s,x)=>s+x.value,0);
+  const tc = h.reduce((s,x)=>s+x.cost,0);
+  const tp = tv - tc;
+  const pct = tc ? (tp/tc)*100 : 0;
+  const isGain = tp >= 0;
+
+  // Bar widths: scale so the larger of (cost, value) hits 100%
+  const max = Math.max(tv, tc);
+  const costW = max ? (tc/max)*100 : 0;
+  const valueW = max ? (tv/max)*100 : 0;
+
+  document.getElementById('progressCard').innerHTML = `
+    <div class="progress-header">
+      <span class="progress-title">Capital Invested vs Current Value</span>
+      <div class="progress-stats">
+        <span>Invested: <strong>${fmtGBPshort(tc)}</strong></span>
+        <span>Current: <strong>${fmtGBPshort(tv)}</strong></span>
+        <span>${isGain?'Gain':'Loss'}: <strong class="${isGain?'pos':'neg'}">${isGain?'+':'−'}${fmtGBPshort(Math.abs(tp))} (${pct>=0?'+':''}${pct.toFixed(2)}%)</strong></span>
+      </div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-cost" style="width:${costW}%"></div>
+      <div class="progress-bar-value ${isGain?'gain':'loss'}" style="width:${valueW}%"></div>
+      <div class="progress-marker" style="left:${costW}%"></div>
+    </div>
+    <div class="progress-legend">
+      <span class="progress-legend-item"><span class="progress-legend-dot" style="background:#b8c2d0"></span>Cost basis</span>
+      <span class="progress-legend-item"><span class="progress-legend-dot" style="background:${isGain?'var(--green)':'var(--red)'}"></span>Current value</span>
+    </div>`;
+}
+
 function renderCharts(h) {
   const byVal=[...h].sort((a,b)=>b.value-a.value);
   const byPct=[...h].sort((a,b)=>b.plPct-a.plPct);
   const total=h.reduce((s,x)=>s+x.value,0);
+
+  // Sector aggregation
+  const sectorMap = {};
+  h.forEach(x => { sectorMap[x.sector] = (sectorMap[x.sector]||0) + x.value; });
+  const sectors = Object.entries(sectorMap).sort((a,b)=>b[1]-a[1]);
+
   if (charts.pie) charts.pie.destroy();
   if (charts.bar) charts.bar.destroy();
+  if (charts.sector) charts.sector.destroy();
+
+  // Allocation by position
   charts.pie=new Chart(document.getElementById('pieChart'),{
     type:'doughnut',
     data:{labels:byVal.map(x=>x.ticker),datasets:[{data:byVal.map(x=>x.value),backgroundColor:PALETTE,borderWidth:0,hoverOffset:6}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const pct=((c.parsed/total)*100).toFixed(1);return ` ${c.label}: ${fmtGBP(c.parsed)} (${pct}%)`;}}}}}
   });
   document.getElementById('pieLegend').innerHTML=byVal.map((x,i)=>
-    `<div class="legend-item"><div class="legend-dot" style="background:${PALETTE[i]}"></div>${x.ticker} ${((x.value/total)*100).toFixed(1)}%</div>`).join('');
+    `<div class="legend-item"><div class="legend-dot" style="background:${PALETTE[i % PALETTE.length]}"></div>${x.ticker} ${((x.value/total)*100).toFixed(1)}%</div>`).join('');
+
+  // Sector donut
+  charts.sector=new Chart(document.getElementById('sectorChart'),{
+    type:'doughnut',
+    data:{labels:sectors.map(s=>s[0]),datasets:[{data:sectors.map(s=>s[1]),backgroundColor:SECTOR_PALETTE,borderWidth:0,hoverOffset:6}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const pct=((c.parsed/total)*100).toFixed(1);return ` ${c.label}: ${fmtGBP(c.parsed)} (${pct}%)`;}}}}}
+  });
+  document.getElementById('sectorLegend').innerHTML=sectors.map((s,i)=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${SECTOR_PALETTE[i % SECTOR_PALETTE.length]}"></div>${s[0]} ${((s[1]/total)*100).toFixed(1)}%</div>`).join('');
+
+  // P/L bar chart
   charts.bar=new Chart(document.getElementById('barChart'),{
     type:'bar',
     data:{labels:byPct.map(x=>x.ticker),datasets:[{data:byPct.map(x=>x.plPct),backgroundColor:byPct.map(x=>x.plPct>=0?'#1D9E75':'#D85A30'),borderWidth:0,borderRadius:4}]},
@@ -280,16 +440,24 @@ function renderTable() {
     if(typeof av==='string') return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
     return sortAsc?av-bv:bv-av;
   });
+  const maxWeight = Math.max(...allHoldings.map(x=>x.weight));
   document.getElementById('tableBody').innerHTML=sorted.map(x=>`
-    <tr>
+    <tr class="${x.plGBP>=0?'row-pos':'row-neg'}">
       <td><span class="ticker">${x.ticker}</span></td>
       <td><span class="co-name">${x.name}</span></td>
+      <td><span class="co-name">${x.sector}</span></td>
       <td class="r">${x.qty%1===0?x.qty:x.qty.toFixed(2)}</td>
       <td class="r" style="color:var(--muted)">£${x.avgBuy.toFixed(2)}</td>
       <td class="r" style="color:var(--muted)">£${x.price.toFixed(2)}</td>
       <td class="r"><span class="val-bold">${fmtGBP(x.value)}</span></td>
+      <td class="r">
+        <div class="weight-cell">
+          <div class="weight-bar"><div class="weight-bar-fill" style="width:${(x.weight/maxWeight)*100}%"></div></div>
+          <span class="weight-pct">${x.weight.toFixed(1)}%</span>
+        </div>
+      </td>
       <td class="r" style="color:#aaa">${fmtGBP(x.cost)}</td>
-      <td class="r"><span class="£{x.plGBP>=0?'pos':'neg'}">${x.plGBP>=0?'+':'−'}${fmtGBP(x.plGBP)}</span></td>
+      <td class="r"><span class="${x.plGBP>=0?'pos':'neg'}">${x.plGBP>=0?'+':'−'}${fmtGBP(x.plGBP)}</span></td>
       <td class="r"><span class="badge ${x.plPct>=0?'badge-pos':'badge-neg'}">${x.plPct>=0?'+':''}${x.plPct.toFixed(2)}%</span></td>
     </tr>`).join('');
   const tv=allHoldings.reduce((s,x)=>s+x.value,0);
@@ -298,13 +466,36 @@ function renderTable() {
   const tpct=tc?(tp/tc)*100:0;
   document.getElementById('tableFoot').innerHTML=`
     <tr>
-      <td colspan="2" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.06em">Total · ${allHoldings.length} positions</td>
+      <td colspan="3" style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.06em">Total · ${allHoldings.length} positions</td>
       <td class="r"></td><td class="r"></td><td class="r"></td>
       <td class="r val-bold">${fmtGBP(tv)}</td>
+      <td class="r" style="color:var(--muted);font-weight:600">100.0%</td>
       <td class="r" style="color:#aaa">${fmtGBP(tc)}</td>
       <td class="r"><span class="${tp>=0?'pos':'neg'}">${tp>=0?'+':'−'}${fmtGBP(tp)}</span></td>
       <td class="r"><span class="badge ${tpct>=0?'badge-pos':'badge-neg'}">${tpct>=0?'+':''}${tpct.toFixed(2)}%</span></td>
     </tr>`;
+}
+
+function exportCSV() {
+  if (!allHoldings.length) return;
+  const headers = ['Ticker','Name','Sector','Qty','Avg Buy (GBP)','Live Price (GBP)','Value (GBP)','Weight %','Cost Basis (GBP)','P/L (GBP)','P/L %'];
+  const rows = allHoldings.map(x => [
+    x.ticker, x.name, x.sector,
+    x.qty, x.avgBuy.toFixed(2), x.price.toFixed(2),
+    x.value.toFixed(2), x.weight.toFixed(2), x.cost.toFixed(2),
+    x.plGBP.toFixed(2), x.plPct.toFixed(2)
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => {
+    const s = String(c);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `portfolio-${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 function setStatus(txt,cls){const el=document.getElementById('syncPill');el.textContent=txt;el.className='sync-pill '+cls;}
