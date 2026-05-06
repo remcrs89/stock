@@ -273,25 +273,10 @@ async function fetchData() {
     if (!text || text.length < 50) throw new Error('Empty response');
     const rows = parseCSV(text);
     if (rows.length < 2) throw new Error('No data rows');
-
-    // Debug: log first 3 rows to console so we can inspect column indices
-    console.log('CSV DEBUG — row 0 (header):', rows[0]);
-    console.log('CSV DEBUG — row 1 (first data):', rows[1]);
-    console.log('CSV DEBUG — row 2:', rows[2]);
-    console.log('CSV total rows:', rows.length, '| cols in row1:', rows[1]?.length);
-
     render(rows);
     hasLoadedOnce = true;
-
-    // If any weekPct/monthPct came through as 0 (GOOGLEFINANCE still loading), retry once
-    const hasPerf = allHoldings.some(x => x.weekPct !== 0 || x.monthPct !== 0);
-    if (!hasPerf) {
-      setStatus('Waiting for live data...', 'syncing');
-      retryTimer = setTimeout(fetchData, 8000);
-    } else {
-      setStatus('Synced ' + new Date().toLocaleTimeString(), 'ok');
-      retryTimer = setTimeout(fetchData, 30000);
-    }
+    setStatus('Synced ' + new Date().toLocaleTimeString(), 'ok');
+    retryTimer = setTimeout(fetchData, 120000);
   } catch(e) {
     setStatus('Failed to load', 'error');
     if (!hasLoadedOnce) {
@@ -322,9 +307,7 @@ function parseCSV(text) {
 
 function num(s) {
   if (!s) return 0;
-  const str = s.toString().trim();
-  if (str.startsWith('#') || str === 'Loading...' || str === 'N/A') return 0;
-  return parseFloat(str.replace(/[£$,\s%]/g,'').replace(/[−–]/g,'-'))||0;
+  return parseFloat(s.toString().replace(/[£$,\s%]/g,'').replace(/[−–]/g,'-'))||0;
 }
 function fmtGBP(n) {
   return '£'+Math.abs(n).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -334,42 +317,27 @@ function fmtGBPshort(n) {
 }
 
 function render(rows) {
-  const SKIP=['ticker','tiker','company','instrument','name','xbt','xib','avg','quanti','crcy','snap','price','current','unrealiz','week','month','sparkline'];
-
-  // Row 0 = headers, data starts row 1
-  // Confirmed column indices from sheet:
-  // A=0 Ticker, B=1 Name, C=2 Qty, D=3 CRCY, E=4 AvgBuy(GBp),
-  // F=5 SnapClose, G=6 empty, H=7 Price(GBP), I=8 Price(USD),
-  // J=9 Value(GBP), K=10 Cost(GBP), L=11 P/L(GBP), M=12 P/L%,
-  // N=13 Week%, O=14 Sparkline(blank), P=15 Monthly%
-  const col = {
-    ticker:0, name:1, qty:2, avgBuy:4, price:7,
-    value:9, cost:10, plGBP:11, plPct:12, weekPct:13, monthPct:15
-  };
-
-  console.log('First data row:', rows[1]);
-  console.log('Row count:', rows.length);
-
+  const SKIP=['ticker','instrument','name','xbt','xib','avg','quanti'];
   const holdings=[];
   for (let i=1;i<rows.length;i++) {
     const r=rows[i];
     const ticker=(r[0]||'').trim();
     if (!ticker||SKIP.some(s=>ticker.toLowerCase().startsWith(s))) continue;
-    const value=num(r[col.value]) || num(r[col.cost]);
+    const value=num(r[9]);
     if (value<=0) continue;
     holdings.push({
       ticker,
-      name:(r[col.name]||'').trim(),
+      name:(r[1]||'').trim(),
       sector: SECTORS[ticker.toUpperCase()] || 'Other',
-      qty:     num(r[col.qty]),
-      avgBuy:  num(r[col.avgBuy])/100,
-      price:   num(r[col.price]),
+      qty:num(r[2]),
+      avgBuy:num(r[4])/100,
+      price:num(r[7]),
       value,
-      cost:    num(r[col.cost]),
-      plGBP:   num(r[col.plGBP]),
-      plPct:   num(r[col.plPct]),
-      weekPct: num(r[col.weekPct]),
-      monthPct:num(r[col.monthPct])
+      cost:num(r[10]),
+      plGBP:num(r[11]),
+      plPct:num(r[12]),
+      weekPct: num(r[13]),   // col N — sheet stores as % e.g. "17.66%" → num() strips % sign
+      monthPct: num(r[15])   // col P — same
     });
   }
   if (!holdings.length){showError('No holdings found.');return;}
