@@ -355,12 +355,6 @@ function render(rows) {
   document.getElementById('dashboard').style.display='block';
 }
 
-function periodPills(h, field) {
-  const avg = h.reduce((s,x)=>s+(x[field]||0),0) / h.filter(x=>x[field]!==undefined).length;
-  const cls = avg>0?'pos':avg<0?'neg':'neu';
-  const sign = avg>0?'+':'';
-  return `<span class="period-pill ${cls}"><span class="period-label">${field==='weekPct'?'7d':'30d'}</span>${sign}${avg.toFixed(2)}%</span>`;
-}
 
 function pillFor(val, label) {
   if (val === undefined || val === null || isNaN(val)) return '';
@@ -497,25 +491,6 @@ function sortTable(key) {
   const th=document.getElementById('th-'+key);
   if(th){th.classList.add('sorted');th.textContent+=sortAsc?' ▲':' ▼';}
   renderTable();
-}
-
-function makeSpark(weekPct, monthPct) {
-  // Build a tiny 3-point SVG line: month start → midpoint → week end
-  // We use the two % values to infer direction shape
-  if (isNaN(weekPct) || isNaN(monthPct)) return '<svg width="60" height="24"></svg>';
-  const w=60, h=24, pad=3;
-  // Normalise points to svg coords: higher % = higher on chart (lower y)
-  const pts = [monthPct, (monthPct+weekPct)/2, weekPct];
-  const mn = Math.min(...pts), mx = Math.max(...pts);
-  const range = mx - mn || 1;
-  const ys = pts.map(v => pad + (1 - (v-mn)/range) * (h - pad*2));
-  const xs = [0, w/2, w];
-  const path = `M${xs[0]},${ys[0]} C${xs[0]+10},${ys[0]} ${xs[1]-10},${ys[1]} ${xs[1]},${ys[1]} S${xs[2]-10},${ys[2]} ${xs[2]},${ys[2]}`;
-  const color = weekPct >= 0 ? '#1D9E75' : '#D85A30';
-  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-    <path d="${path}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linecap="round"/>
-    <circle cx="${xs[2]}" cy="${ys[2]}" r="2.5" fill="${color}"/>
-  </svg>`;
 }
 
 function renderTable() {
